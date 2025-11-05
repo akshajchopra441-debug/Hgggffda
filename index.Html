@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Offline Search Engine</title>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    input { padding: 10px; width: 300px; border-radius: 5px; border: 1px solid gray; }
+    button { padding: 10px; border: none; background: blue; color: white; border-radius: 5px; }
+    .result { margin-top: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>My Own Search Engine</h1>
+  <input type="text" id="searchBox" placeholder="Type something...">
+  <button onclick="search()">Search</button>
+  <div id="results"></div>
+
+  <script>
+    let fuse;
+
+    // Load data.json file
+    fetch('data.json')
+      .then(response => response.json())
+      .then(data => {
+        fuse = new Fuse(data, {
+          keys: ['title', 'content'],
+          includeScore: true,
+          threshold: 0.4
+        });
+      })
+      .catch(error => console.error("Error loading data.json", error));
+
+    function search() {
+      const query = document.getElementById('searchBox').value;
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = "";
+
+      if (!query) {
+        resultsDiv.innerHTML = "<p>Please type something to search!</p>";
+        return;
+      }
+
+      const results = fuse.search(query);
+      if (results.length === 0) {
+        resultsDiv.innerHTML = "<p>No results found.</p>";
+        return;
+      }
+
+      results.forEach(result => {
+        const item = result.item;
+        const div = document.createElement('div');
+        div.className = "result";
+        div.innerHTML = <strong>${item.title}</strong><p>${item.content}</p>;
+        resultsDiv.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
